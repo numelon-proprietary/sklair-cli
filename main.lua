@@ -3,7 +3,7 @@ local fs = require("fs")
 local tokenise = require("./html/tokeniser")
 local parse = require("./html/parser")
 
-local src = fs.readFileSync("test.html")
+local src = fs.readFileSync("./src/index.html")
 
 local t = tokenise(src)
 
@@ -44,4 +44,5 @@ print()
 print()
 
 local serialise = require("./html/serialiser")
-fs.writeFileSync("./out.html", serialise(parsed))
+fs.writeFileSync("./src/out.html", serialise(parsed)) -- obviously just a test
+-- in the real tool, we wont EVER be writing to src, only reading
