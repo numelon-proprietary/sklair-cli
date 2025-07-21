@@ -1,6 +1,7 @@
 # Todo list
 
 - add proper support for boolean props, e.g. `disabled=true` instead of just `disabled`
+- define whatever this is, is this a framework or a templating engine?
 
 ## todo list transferred from `numelon-proprietary/website` repo
 
@@ -15,8 +16,8 @@
       - if js file is found then assume regular html component registered via js and add the js to head tag. ofc if css with same name is found then import that too
       - therefore the order from most important to least is like this:
         1. componentName.js -> import js (& optional css, if html is present then ignored) in head
-        2. componentName.html -> replace all occurences of `<componentName/>` or `<componentName>` or `<componentName><componentName/>` with contents of componentName.html. (& optional css in head)
-            - note that if it is `<componentName>aaa<componentName/>` then `aaa` would be passed to `$$COMPONENT_BODY` var inside componentName.html.
+        2. componentName.html -> replace all occurences of `<componentName/>` or `<componentName>` or `<componentName></componentName>` with contents of componentName.html. (& optional css in head)
+            - note that if it is `<componentName>aaa</componentName>` then `aaa` would be passed to `$$COMPONENT_BODY` var inside componentName.html.
   - reusable component for menubar and footer
   - allow components to be used inside of eachother (in src) but hard fail on circular component usage bc infinite loop
 
