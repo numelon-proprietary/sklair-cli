@@ -1,3 +1,0 @@
-local html = {}
-
-return html
