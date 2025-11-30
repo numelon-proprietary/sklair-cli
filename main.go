@@ -11,8 +11,7 @@ import (
 )
 
 func main() {
-	logger.InitShared(logger.LevelDebug, "2006-01-02 15:04:05", "sklair.log")
-	defer logger.CloseShared()
+	logger.InitShared(logger.LevelDebug)
 
 	content, err := os.ReadFile("test.html")
 	if err != nil {
@@ -37,5 +36,5 @@ func main() {
 	}
 
 	fmt.Println(toReplace)
-	logger.Info("Found %d tags to remove", len(toReplace))
+	logger.Info("Found %d tags to replace", len(toReplace))
 }
