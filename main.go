@@ -86,6 +86,10 @@ func main() {
 			}
 		}
 
+		// TODO: LEFT OFF HERE. AFTER ALL NODES DISCOVERED ETC NEED TO REPLACE
+		// TODO: in the future, hash component file contents and construct local cache in .sklair directory
+		// but how would we "cache" a html.Node struct?? lol
+
 		logger.Info("Found %d tags to replace in %s", len(toReplace), filePath)
 
 		for _, node := range toReplace {
@@ -139,7 +143,7 @@ func main() {
 			return
 		}
 
-		err = os.WriteFile("output.html", newWriter.Bytes(), 0644)
+		err = os.WriteFile("./src/output.html", newWriter.Bytes(), 0644)
 		if err != nil {
 			logger.Error("Could not write output : %s", err.Error())
 			return
