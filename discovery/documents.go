@@ -19,6 +19,10 @@ func DocumentDiscovery(root string) (*DocumentLists, error) {
 			return err
 		}
 
+		if info.IsDir() && filepath.Base(path) == "components" {
+			return filepath.SkipDir
+		}
+
 		// skip directories since they will be walked by filepath.Walk later anyways
 		if info.IsDir() {
 			return nil
