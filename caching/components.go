@@ -37,6 +37,53 @@ func Cache(source string, name string) (*Component, bool, error) {
 		return nil, false, err
 	}
 
+	// even though components are usually bare (without doctype, head, body, etc), we still need to find the "body" (bc parsed)
+	//body := component.FirstChild
+	//for body != nil && body.Data != "html" {
+	//	body = body.NextSibling
+	//}
+	//if body != nil {
+	//	body = body.FirstChild
+	//	for body != nil && body.Data != "body" {
+	//		body = body.NextSibling
+	//	}
+	//}
+	//
+	//if (body != nil) && (body.FirstChild != nil) {
+	//	component = body.FirstChild
+	//}
+
+	// old code before refactoring
+	/*
+		component, err := html.Parse(bytes.NewReader(f))
+						if err != nil {
+							logger.Error("Could not parse component %s : %s", componentPath, err.Error())
+							return
+						}
+
+						// even though components are usually bare (without doctype, head, body, etc), we still need to find the "body" (bc parsed)
+						body := component.FirstChild
+						for body != nil && body.Data != "html" {
+							body = body.NextSibling
+						}
+						if body != nil {
+							body = body.FirstChild
+							for body != nil && body.Data != "body" {
+								body = body.NextSibling
+							}
+						}
+
+						if body != nil {
+							parent := node.Parent
+							if parent != nil {
+								for child := body.FirstChild; child != nil; child = child.NextSibling {
+									parent.InsertBefore(htmlUtilities.Clone(child), node)
+								}
+								parent.RemoveChild(node)
+							}
+						}
+	*/
+
 	// TODO: make a new struct for components which includes a head section and a body section
 	// for head, perform deduplication when multiple components in same document share head stuff
 	// for body, just insert as usual

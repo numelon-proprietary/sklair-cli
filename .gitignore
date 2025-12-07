@@ -3,6 +3,9 @@ out.html
 src/output.html
 sklair.log
 
+build
+src/build
+
 # macOS Files
 **._*
 **.DS_*

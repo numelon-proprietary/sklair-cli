@@ -2,6 +2,7 @@ package main
 
 import (
 	"bytes"
+	"fmt"
 	"os"
 	"path/filepath"
 	"sklair/caching"
@@ -26,14 +27,19 @@ func main() {
 		logger.Error("Could not scan documents : %s", err.Error())
 		return
 	}
+
+	componentPath := filepath.Join(SrcDir, ComponentsDir)
 	logger.Info("Discovering components...")
-	components, err := discovery.ComponentDiscovery(ComponentsDir)
+	components, err := discovery.ComponentDiscovery(componentPath)
 	if err != nil {
 		logger.Error("Could not scan components : %s", err.Error())
 		return
 	}
 
-	componentCache := caching.ComponentCache{}
+	componentCache := caching.ComponentCache{
+		Static:  make(map[string]*caching.Component),
+		Dynamic: make(map[string]*caching.Component),
+	}
 
 	for _, filePath := range scanned.HtmlFiles {
 		content, err := os.ReadFile(filePath)
@@ -93,47 +99,65 @@ func main() {
 		logger.Info("Found %d tags to replace in %s", len(toReplace), filePath)
 
 		for _, node := range toReplace {
+			dynComponent, dynamicExists := componentCache.Dynamic[node.Data]
+			stcComponent, staticExists := componentCache.Static[node.Data]
 
-			componentPath := filepath.Join(ComponentsDir, node.Data+".html")
-
-			if _, err := os.Stat(componentPath); err != nil {
-				logger.Error("Could not find component %s : %s", componentPath, err.Error())
-				return
+			if staticExists {
+				parent := node.Parent
+				if parent != nil {
+					for child := stcComponent.Node; child != nil; child = child.NextSibling {
+						parent.InsertBefore(htmlUtilities.Clone(child), node)
+					}
+					parent.RemoveChild(node)
+				}
+			} else if dynamicExists {
+				fmt.Println(dynComponent)
+				logger.Warning("Dynamic components are not implemented yet, skipping %s...", node.Data)
 			} else {
-				f, err := os.ReadFile(componentPath)
-				if err != nil {
-					logger.Error("Could not read component %s : %s", componentPath, err.Error())
-					return
-				}
-
-				component, err := html.Parse(bytes.NewReader(f))
-				if err != nil {
-					logger.Error("Could not parse component %s : %s", componentPath, err.Error())
-					return
-				}
-
-				// even though components are usually bare (without doctype, head, body, etc), we still need to find the "body" (bc parsed)
-				body := component.FirstChild
-				for body != nil && body.Data != "html" {
-					body = body.NextSibling
-				}
-				if body != nil {
-					body = body.FirstChild
-					for body != nil && body.Data != "body" {
-						body = body.NextSibling
-					}
-				}
-
-				if body != nil {
-					parent := node.Parent
-					if parent != nil {
-						for child := body.FirstChild; child != nil; child = child.NextSibling {
-							parent.InsertBefore(htmlUtilities.Clone(child), node)
-						}
-						parent.RemoveChild(node)
-					}
-				}
+				logger.Info("Component %s not in cache, assuming JS tag and skipping...", node.Data)
+				continue
 			}
+
+			//componentPath := filepath.Join(ComponentsDir, node.Data+".html")
+			//
+			//if _, err := os.Stat(componentPath); err != nil {
+			//	logger.Error("Could not find component %s : %s", componentPath, err.Error())
+			//	return
+			//} else {
+			//	f, err := os.ReadFile(componentPath)
+			//	if err != nil {
+			//		logger.Error("Could not read component %s : %s", componentPath, err.Error())
+			//		return
+			//	}
+			//
+			//	component, err := html.Parse(bytes.NewReader(f))
+			//	if err != nil {
+			//		logger.Error("Could not parse component %s : %s", componentPath, err.Error())
+			//		return
+			//	}
+			//
+			//	// even though components are usually bare (without doctype, head, body, etc), we still need to find the "body" (bc parsed)
+			//	body := component.FirstChild
+			//	for body != nil && body.Data != "html" {
+			//		body = body.NextSibling
+			//	}
+			//	if body != nil {
+			//		body = body.FirstChild
+			//		for body != nil && body.Data != "body" {
+			//			body = body.NextSibling
+			//		}
+			//	}
+			//
+			//	if body != nil {
+			//		parent := node.Parent
+			//		if parent != nil {
+			//			for child := body.FirstChild; child != nil; child = child.NextSibling {
+			//				parent.InsertBefore(htmlUtilities.Clone(child), node)
+			//			}
+			//			parent.RemoveChild(node)
+			//		}
+			//	}
+			//}
 		}
 
 		newWriter := bytes.NewBuffer(nil)
@@ -143,12 +167,21 @@ func main() {
 			return
 		}
 
-		err = os.WriteFile("./src/output.html", newWriter.Bytes(), 0644)
+		relPath, err := filepath.Rel(SrcDir, filePath)
+		if err != nil {
+			logger.Error("Could not get relative path : %s", err.Error())
+			return
+		}
+
+		outPath := filepath.Join("build", relPath)
+		_ = os.MkdirAll(filepath.Dir(outPath), 0755)
+
+		err = os.WriteFile(outPath, newWriter.Bytes(), 0644)
 		if err != nil {
 			logger.Error("Could not write output : %s", err.Error())
 			return
 		}
 
-		logger.Info("Saved to output.html")
+		logger.Info("Saved to %s", outPath)
 	}
 }
