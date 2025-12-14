@@ -9,9 +9,7 @@
 	"exclude": ["**/.*",
       "!*/.htaccess",
       "**/*.md",
-      "**/*.psd",
-      "**/.DS_*",
-      "**/._*"
+      "**/*.psd"
     ],
 
 	"exclude_compile": ["someBigFile.html"],

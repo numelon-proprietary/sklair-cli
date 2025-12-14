@@ -13,15 +13,24 @@ type DocumentLists struct {
 	StaticFiles []string
 }
 
+// TODO: allow paths to not look ugly like this; make it closer to gitignore
+// eg allow "components" instead, ".git", "build" instead of "**/build/**"
 var defaultExcludes = []string{
-	"**/components/**",
+	"**/components/**", // default sklair component directory
+	// although it must be noted that the component dir from config is used instead
+	// TODO: remove the components exclusion and use config one instead
+	"**/sklair.json",
+	"**/build/**", // use one from sklair.json instead too
+
 	"**/.git/**",
 	"**/.vscode/**",
 	"**/.idea/**",
-	"**/.env",
+
+	"**/.env*", // highly sensitive
 	"**/node_modules/**",
-	"**/build/**",
-	"**/sklair.json",
+
+	"**/.DS_*", // macOS garbage
+	"**/._*",   // macOS garbage
 }
 
 func splitPatterns(patterns []string) (excludes, includes []string) {
