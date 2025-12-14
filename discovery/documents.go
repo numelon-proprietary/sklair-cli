@@ -20,6 +20,11 @@ var skipDirs = map[string]struct{}{
 	// but at Numelon these are folders and therefore must be excluded (for safety)
 }
 
+var skipFiles = map[string]struct{}{
+	"sklair.json": {},
+	".env":        {},
+}
+
 func DocumentDiscovery(root string) (*DocumentLists, error) {
 	lists := &DocumentLists{}
 
@@ -37,11 +42,12 @@ func DocumentDiscovery(root string) (*DocumentLists, error) {
 			return nil
 		}
 
-		ext := strings.ToLower(filepath.Ext(info.Name()))
+		fileName := strings.ToLower(info.Name())
+		ext := filepath.Ext(fileName)
 		// TODO: perhaps allow this file ext to be customisable?
 		if ext == ".html" || ext == ".shtml" {
 			lists.HtmlFiles = append(lists.HtmlFiles, path)
-		} else {
+		} else if _, ok := skipFiles[fileName]; !ok {
 			lists.StaticFiles = append(lists.StaticFiles, path)
 		}
 

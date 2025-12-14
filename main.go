@@ -2,6 +2,7 @@ package main
 
 import (
 	"bytes"
+	"flag"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -9,31 +10,42 @@ import (
 	"sklair/discovery"
 	"sklair/htmlUtilities"
 	"sklair/logger"
+	"sklair/sklairConfig"
 	"strings"
 	"time"
 
 	"golang.org/x/net/html"
 )
 
-const ComponentsDir = "components"
-const SrcDir = "src"
-
 func main() {
 	logger.InitShared(logger.LevelDebug)
 
+	configPath := flag.String("config", "sklair.json", "Path to the sklair.json config file")
+	flag.Parse()
+
+	config, err := sklairConfig.Load(*configPath)
+	if err != nil {
+		logger.Error("Could not load sklair.json : %s", err.Error())
+		return
+	}
+
 	start := time.Now()
+
+	configDir := filepath.Dir(*configPath)
+	inputPath := filepath.Join(configDir, config.Input)
+	componentsPath := filepath.Join(configDir, config.Components)
+	outputPath := filepath.Join(configDir, config.Output)
 
 	// TODO: add a function to logger which has a cool processing animation or something
 	logger.Info("Discovering documents...")
-	scanned, err := discovery.DocumentDiscovery(SrcDir)
+	scanned, err := discovery.DocumentDiscovery(inputPath)
 	if err != nil {
 		logger.Error("Could not scan documents : %s", err.Error())
 		return
 	}
 
-	componentPath := filepath.Join(SrcDir, ComponentsDir)
 	logger.Info("Discovering components...")
-	components, err := discovery.ComponentDiscovery(componentPath)
+	components, err := discovery.ComponentDiscovery(componentsPath)
 	if err != nil {
 		logger.Error("Could not scan components : %s", err.Error())
 		return
@@ -79,7 +91,7 @@ func main() {
 						}
 
 						logger.Info("Processing and caching tag %s...", tag)
-						c, dynamic, err := caching.Cache(componentPath, componentSrc)
+						c, dynamic, err := caching.Cache(componentsPath, componentSrc)
 						if err != nil {
 							logger.Error("Could not cache component %s : %s", componentSrc, err.Error())
 							return
@@ -135,13 +147,13 @@ func main() {
 			return
 		}
 
-		relPath, err := filepath.Rel(SrcDir, filePath)
+		relPath, err := filepath.Rel(inputPath, filePath)
 		if err != nil {
 			logger.Error("Could not get relative path : %s", err.Error())
 			return
 		}
 
-		outPath := filepath.Join("build", relPath)
+		outPath := filepath.Join(outputPath, relPath)
 		_ = os.MkdirAll(filepath.Dir(outPath), 0755)
 
 		err = os.WriteFile(outPath, newWriter.Bytes(), 0644)
@@ -151,7 +163,6 @@ func main() {
 		}
 
 		logger.Info("Saved to %s", outPath)
-		//logger.Debug("Output : %s", string(newWriter.Bytes()))
 	}
 
 	logger.Info("Finished in %s", time.Since(start))
