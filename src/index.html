@@ -5,13 +5,6 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-
-    <link rel="icon" href="branding/icon-colour.square.png" />
-
-    <meta name="theme-color" content="#24100a">
-
     <!-- TODO: turn this SEO stuff into an <OpenGraph> component later -->
     <meta name="title" content="Sklair | HTML deserved better.">
     <meta property="og:title" content="Sklair | HTML deserved better.">
@@ -33,21 +26,15 @@
     <meta property="og:url" content="https://sklair.numelon.com">
     <meta name="twitter:url" content="https://sklair.numelon.com">
 
-    <link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville&family=Manrope:wght@400;600;800&display=swap"
-        rel="stylesheet">
-
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="./styles/tailwind.config.js"></script>
-
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/js/all.min.js" defer></script>
     <title>Sklair | HTML deserved better.</title>
-
-    <script defer data-domain="plstrk.numelon.com"
-        src="https://plstrk.numelon.com/js/script.file-downloads.hash.outbound-links.js"></script>
-    <script>window.plausible = window.plausible || function () { (window.plausible.q = window.plausible.q || []).push(arguments) }</script>
 </head>
 
 <body class="font-secondary">
+    <!-- THESE ARE MOSTLY HEAD COMPONENTS! -->
+    <CommonHead></CommonHead>
+    <Analytics></Analytics>
+    <!-- --------------------------------- -->
+
     <MenuBar></MenuBar>
 
     <!-- added mt-20 top margin because menubar is on top -->

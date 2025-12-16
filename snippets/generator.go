@@ -7,6 +7,6 @@ var Generator = &html.Node{
 	Data: "meta",
 	Attr: []html.Attribute{
 		{Key: "name", Val: "generator"},
-		{Key: "content", Val: "sklair - https://sklair.numelon.com"}, // TODO: include sklair version here
+		{Key: "content", Val: "Sklair - https://sklair.numelon.com"}, // TODO: include sklair version here
 	},
 }

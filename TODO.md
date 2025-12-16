@@ -23,10 +23,10 @@
 - create a JSON schema for `sklair.json` files:
 - <https://json-schema.org/understanding-json-schema/reference/index.html>
 - note that any file paths like `input` and `output` are RELATIVE to the sklair.json file
-- allow components to be FULL html files with a head and body. If it is a full file (as opposed to just a regular component body that is bare), then basically build a "cache" of things from the head that will be inserted into the source document (deduplication) and the rest of the body just gets inserted as usual
 - create separate timers for actually processing the files - ie file discovery, then compiling. then separate timer for copying static files since that heavily inflates the build time.
 
 ## todo december 2025
+
 - prepare for distribution to:
   - homebrew
   - winget
@@ -37,7 +37,7 @@
   - think in terms of subcommands:
     - `sklair init` -> creates a sklair.json file in the current directory and answer a questionnaire
     - `sklair build` -> builds the website based on sklair.json file or default values (if no sklair.json then warn about defaults available on docs)
-    - `sklair serve` -> starts a local dev server, watching for changes and auto rebuild also ensure that its not actually built EVERY time theres a change
+    - `sklair serve` -> starts a local dev server, watching for changes and auto rebuild also ensure that its not actually built EVERY time theres a change - also make a preview page available at like /_.sklairpreview which allows you to preview what components look like independently
     - `sklair clean` -> removes all build artifacts (build dir, static dir)
     - `sklair version` -> prints the current version of sklair (TODO: strict semantic versioning!!)
     - `sklair --help` or `sklair help` -> gives help
@@ -50,5 +50,27 @@
   - then only finally print new empty line and then print build time stats etc (summary)
   - also add --silent flag to suppress all output except errors, perfect for ci/cd (todo: github actions for numelon (bespoke) websites) - PRIORITY: this is actually required in the short term!!!
 - search for "TODO" in the entire project and attempt to fix all of those
-- ensure that in main.go the default sklair.json fallnback is NOT src/sklair.json but rather just sklair.json. or just test both?
+- ensure that in main.go the default sklair.json fallback is NOT src/sklair.json but rather just sklair.json. or just test both?
 - long term: allow sklair to integrate third party stuff like tailwind compilation: sklair scans html, sees which classes are used, compiles css. likewise also scans css for tailwind class usage and adds them to css just in case, so that its also programmable.
+- recursively parse components (whilst avoiding circular dependencies/components)
+- allow components to be entire folders with index.html inside, and other files.
+  - usage of a file from the component folder, e.g. the component index.html references the local style.css inside the component folder will be detected byy sklair and then will be rewritten once compiled so that all paths are not broken
+  - at that rate, after compiling create a _sklair directory in the build folder where all component files live in and in the final html, component dependencies are referenced from there
+
+## more todo (a bit long-term?)
+
+sklair shouldnt just blindly replace components but also produce highly optimised output. yeah, sounds crazy for "just some HTML" but thats the point.
+
+build optimisatuions:
+
+- automatic resource discovery (eg external scripts, fonts, images) across documents and components (detect in final output)
+- preconnect and dns-prefetch insertion (automatically after scanning source documents and components) - based on discovered external domains (eg fonts.googleapis.com), automatically insert optimised `<link rel="preconnect">` and `<link rel="dns-prefetch">` tags near the TOP of head
+- heuristic based ordering of head tags for ideal performance
+    1. preconnect/dns prefetch should be first
+    2. stylesheets and scripts logically grouped
+    3. meta and charset tags next
+    4. analytics inserted last (will be very hard to actually define what analytics is - so simply detect from component name such as "analytics" or "tracking" or "google" etc)
+
+- consider providing a final feedback summar at the end of compilation:
+  - basically use all of knowledge in web development thus far and try to provide it through sklair lol
+  - "! consider self-hosting these common external dependencies to improve performance and reduce dns lookups" - sklair recommendation upon detecting common script tags or stylesheets etc (eg fontawesome from cloudflare cdnjs, fonts from google)

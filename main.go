@@ -102,16 +102,16 @@ func main() {
 						}
 
 						logger.Info("Processing and caching tag %s...", tag)
-						c, dynamic, err := caching.Cache(componentsPath, componentSrc)
+						cached, err := caching.Cache(componentsPath, componentSrc)
 						if err != nil {
 							logger.Error("Could not cache component %s : %s", componentSrc, err.Error())
 							return
 						}
 
-						if dynamic {
-							componentCache.Dynamic[tag] = c
+						if cached.Dynamic {
+							componentCache.Dynamic[tag] = cached
 						} else {
-							componentCache.Static[tag] = c
+							componentCache.Static[tag] = cached
 						}
 					}
 
@@ -126,6 +126,10 @@ func main() {
 
 		logger.Info("Found %d tags to replace in %s", len(toReplace), filePath)
 
+		head := htmlUtilities.FindTag(doc, "head")
+
+		seenComponents := make(map[string]struct{})
+		seenHead := make(map[uint64]struct{})
 		for _, originalTag := range toReplace {
 			stcComponent, staticExists := componentCache.Static[originalTag.Data]
 			dynComponent, dynamicExists := componentCache.Dynamic[originalTag.Data]
@@ -135,12 +139,27 @@ func main() {
 			if staticExists {
 				parent := originalTag.Parent
 				if parent != nil {
-					for _, child := range stcComponent.Nodes {
+					for _, child := range stcComponent.BodyNodes {
 						parent.InsertBefore(htmlUtilities.Clone(child), originalTag)
 					}
-					//for child := stcComponent.Node; child != nil; child = child.NextSibling {
-					//	parent.InsertBefore(htmlUtilities.Clone(child), originalTag)
-					//}
+
+					if _, seen := seenComponents[originalTag.Data]; !seen && head != nil {
+						// deduplication of head nodes happens here!
+						for _, child := range stcComponent.HeadNodes {
+							key := htmlUtilities.WeakHashNode(child)
+							//fmt.Println(key)
+							if key == 0 {
+								continue
+							}
+
+							if _, seen := seenHead[key]; seen {
+								continue
+							}
+							seenHead[key] = struct{}{}
+							head.AppendChild(htmlUtilities.Clone(child))
+						}
+					}
+					seenComponents[originalTag.Data] = struct{}{}
 					parent.RemoveChild(originalTag)
 				}
 			} else if dynamicExists {
@@ -156,7 +175,6 @@ func main() {
 			}
 		}
 
-		head := htmlUtilities.FindTag(doc, "head")
 		if config.PreventFOUC.Enabled {
 			body := htmlUtilities.FindTag(doc, "body")
 
@@ -235,4 +253,5 @@ func main() {
 
 	// TODO: instead of a plain logger, add a progress circle or something so that CLI is interactive
 	// keep the plain logger approach (inside the logger lib - idk somehow?) for github runner (plain) mode, etc
+	// ci/cd mode should be enabled on --silent flag
 }

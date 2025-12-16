@@ -1,6 +1,12 @@
 package htmlUtilities
 
-import "golang.org/x/net/html"
+import (
+	"hash/maphash"
+	"strconv"
+	"strings"
+
+	"golang.org/x/net/html"
+)
 
 func Clone(n *html.Node) *html.Node {
 	if n == nil {
@@ -34,4 +40,51 @@ func FindTag(n *html.Node, tag string) *html.Node {
 	}
 
 	return nil
+}
+
+func GetAllChildren(n *html.Node) []*html.Node {
+	var children []*html.Node
+	for child := n.FirstChild; child != nil; child = child.NextSibling {
+		children = append(children, child)
+	}
+
+	return children
+}
+
+var dedupeSeed = maphash.MakeSeed()
+
+func superweakHash(s string) uint64 {
+	var h maphash.Hash
+	h.SetSeed(dedupeSeed)
+	_, _ = h.WriteString(s)
+	return h.Sum64()
+}
+
+// TODO: use this potentially instead of node rendering for FAST(er?) deduplication
+// however this comes with some compromises
+// but I suppose its fine?
+func WeakHashNode(n *html.Node) uint64 {
+	if n == nil {
+		return 0
+	}
+
+	var lala strings.Builder
+
+	lala.WriteString(strconv.Itoa(int(n.Type)))
+	lala.WriteString("|")
+	lala.WriteString(n.Data)
+	lala.WriteString("|")
+
+	for _, attr := range n.Attr {
+		lala.WriteString(attr.Key + "=" + attr.Val)
+		lala.WriteString(";")
+	}
+
+	// only consider input text for script and style tags
+	if (n.Data == "script" || n.Data == "style") && n.FirstChild != nil && n.FirstChild.Type == html.TextNode {
+		lala.WriteString("|")
+		lala.WriteString(n.FirstChild.Data)
+	}
+
+	return superweakHash(lala.String())
 }
