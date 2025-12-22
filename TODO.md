@@ -9,20 +9,19 @@
     - numelon web packing tool will search for components dir
       - if html found then it will replace the tag inside the html with the actual content of the html file
       - if css found for component in component dir then it will be automatically copied to the build directory into css dir and also the link href stylesheet injected into the head of the html file where the component was used
-      - if component not found then just assume its a component registered from within js and leave it as-is, but issue a warning in the logs.
+      - if a component is not found, then just assume its a component registered from within js and leave it as-is, but issue a warning in the logs.
       - if js file is found then assume regular html component registered via js and add the js to head tag. ofc if css with same name is found then import that too
-      - therefore the order from most important to least is like this:
-        1. componentName.js -> import js (& optional css, if html is present then ignored) in head
-        2. componentName.html -> replace all occurences of `<componentName/>` or `<componentName>` or `<componentName></componentName>` with contents of componentName.html. (& optional css in head)
+      - therefore, the order from most important to least is like this:
+        1. componentName.js -> import js (& optional CSS, if HTML is present then ignored) in head
+        2. componentName.html -> replace all occurrences of `<componentName/>` or `<componentName>` or `<componentName></componentName>` with contents of componentName.html. (& optional css in head)
             - note that if it is `<componentName>aaa</componentName>` then `aaa` would be passed to `$$COMPONENT_BODY` var inside componentName.html.
   - reusable component for menubar and footer
-  - allow components to be used inside of eachother (in src) but hard fail on circular component usage bc infinite loop
+  - allow components to be used inside each-other (in src) but hard fail on circular component usage bc infinite loop
 
-- support for replacing $$COMPONENT_BODY inside of javascript too, since its only supported in html right now with `<!-- $$COMPONENT_BODY -->`
+- support for replacing $$COMPONENT_BODY inside JavaScript too, since it's only supported in HTML right now with `<!-- $$COMPONENT_BODY -->`
 
 - create a JSON schema for `sklair.json` files:
 - <https://json-schema.org/understanding-json-schema/reference/index.html>
-- note that any file paths like `input` and `output` are RELATIVE to the sklair.json file
 - create separate timers for actually processing the files - ie file discovery, then compiling. then separate timer for copying static files since that heavily inflates the build time.
 
 ## todo december 2025
@@ -30,8 +29,8 @@
 - prepare for distribution to:
   - homebrew
   - winget
-  - apt (self hosted repo, because debian sponsorship is too slow)
-  - regular github releases -> links on website (although discourage using github releases, make users use homebrew, winget, apt)
+  - apt (self-hosted repo, because debian sponsorship is too slow)
+  - regular GitHub releases -> links on website (although discourage using GitHub releases, make users use homebrew, winget, apt)
   - installation instructions on website very nice
 - make sklair actually more of a cli tool
   - think in terms of subcommands:
@@ -41,14 +40,12 @@
     - `sklair clean` -> removes all build artifacts (build dir, static dir)
     - `sklair version` -> prints the current version of sklair (TODO: strict semantic versioning!!)
     - `sklair --help` or `sklair help` -> gives help
-    - `sklair update` -> updates sklair to latest version (ALSO: ensure that on every run of sklair, it notifies the user of a new version unless auto update check is disabled in sklair config)
+    - `sklair update` -> updates sklair to the latest version (ALSO: ensure that on every run of sklair, it notifies the user of a new version unless auto update check is disabled in sklair config)
     - `sklair docs` -> opens sklair docs in browser
     - `sklair config` -> opens sklair config file in default editor. sklair config file should be in HOME/.sklair.config.json
     - to make sklair more maintainable as a CLI tool with subcommands, take application commands base from CommandRegistry in other numelon-proprietary projects
       - adapt it for use with cli, each subcommand is registered etc just like in CommandRegistry
-  - improve CLI UX. perhaps at some point think of replacing our fancy "logs" (glorified prints) with a spinner animation and progress bar. spinner for doc/static discovery, then progress bar for compilign and copying static files etc.
-  - then only finally print new empty line and then print build time stats etc (summary)
-  - also add --silent flag to suppress all output except errors, perfect for ci/cd (todo: github actions for numelon (bespoke) websites) - PRIORITY: this is actually required in the short term!!!
+  - then only finally print a new empty line and then print build time stats etc (summary)
 - search for "TODO" in the entire project and attempt to fix all of those
 - ensure that in main.go the default sklair.json fallback is NOT src/sklair.json but rather just sklair.json. or just test both?
 - long term: allow sklair to integrate third party stuff like tailwind compilation: sklair scans html, sees which classes are used, compiles css. likewise also scans css for tailwind class usage and adds them to css just in case, so that its also programmable.
@@ -59,9 +56,9 @@
 
 ## more todo (a bit long-term?)
 
-sklair shouldnt just blindly replace components but also produce highly optimised output. yeah, sounds crazy for "just some HTML" but thats the point.
+sklair shouldn't just blindly replace components but also produce highly optimised output. yeah, sounds crazy for "just some HTML" but thats the point.
 
-build optimisatuions:
+build optimisations:
 
 - automatic resource discovery (eg external scripts, fonts, images) across documents and components (detect in final output)
 - preconnect and dns-prefetch insertion (automatically after scanning source documents and components) - based on discovered external domains (eg fonts.googleapis.com), automatically insert optimised `<link rel="preconnect">` and `<link rel="dns-prefetch">` tags near the TOP of head
@@ -71,6 +68,10 @@ build optimisatuions:
     3. meta and charset tags next
     4. analytics inserted last (will be very hard to actually define what analytics is - so simply detect from component name such as "analytics" or "tracking" or "google" etc)
 
-- consider providing a final feedback summar at the end of compilation:
-  - basically use all of knowledge in web development thus far and try to provide it through sklair lol
+- consider providing a final feedback summary at the end of compilation:
+  - basically use all of the knowledge in web development thus far and try to provide it through sklair lol
   - "! consider self-hosting these common external dependencies to improve performance and reduce dns lookups" - sklair recommendation upon detecting common script tags or stylesheets etc (eg fontawesome from cloudflare cdnjs, fonts from google)
+
+# documentation pages
+- how to use sklair in github workflows (how to deploy to github pages)
+- how to make a sklair website

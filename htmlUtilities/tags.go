@@ -1,9 +1,9 @@
-package main
+package htmlUtilities
 
 // A merged map of the following sources:
 // https://cs.opensource.google/go/x/net/+/master:html/const.go
 // https://cs.opensource.google/go/x/net/+/master:html/foreign.go
-var htmlTags = map[string]bool{
+var HtmlTags = map[string]bool{
 	"address":    true,
 	"applet":     true,
 	"area":       true,

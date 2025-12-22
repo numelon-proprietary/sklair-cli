@@ -82,7 +82,8 @@ func (l *Logger) Warning(format string, args ...any) { l.log(LevelWarning, forma
 func (l *Logger) Info(format string, args ...any)    { l.log(LevelInfo, format, args...) }
 func (l *Logger) Debug(format string, args ...any)   { l.log(LevelDebug, format, args...) }
 func (l *Logger) P(format string, args ...any)       { l.log(LevelNone, format, args...) }
-func (l *Logger) EmptyLine()                         { l.emptyLine(LevelNone) }
+
+//func (l *Logger) EmptyLine()                         { l.emptyLine(LevelInfo) }
 
 // shared logger
 var shared *Logger
@@ -97,4 +98,5 @@ func Warning(format string, args ...any) { shared.log(LevelWarning, format, args
 func Info(format string, args ...any)    { shared.log(LevelInfo, format, args...) }
 func Debug(format string, args ...any)   { shared.log(LevelDebug, format, args...) }
 func P(format string, args ...any)       { shared.log(LevelNone, format, args...) }
-func EmptyLine()                         { shared.emptyLine(LevelNone) }
+
+//func EmptyLine()                         { shared.emptyLine(LevelInfo) }
