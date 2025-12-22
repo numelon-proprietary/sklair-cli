@@ -51,22 +51,28 @@ func yesNo(v bool) string {
 	return "no"
 }
 
+func preeeent(a, b string) {
+	fmt.Printf("%-22s %s\n", a, b)
+}
+
 func configurationSummary(cfg sklairConfig.ProjectConfig) {
 	fmt.Println()
 	fmt.Println(logger.Green + "Configuration summary:")
 	fmt.Println("--------------------------------------------------" + logger.Cyan)
-	fmt.Printf("Input directory:		%s\n", cfg.Input)
-	fmt.Printf("Components directory:	%s\n", cfg.Components)
-	fmt.Printf("Output directory:		%s\n", cfg.Output)
+	preeeent("Input directory:", cfg.Input)
+	preeeent("Components directory:", cfg.Components)
+	preeeent("Output directory:", cfg.Output)
 
 	if cfg.PreventFOUC != nil && cfg.PreventFOUC.Enabled {
-		fmt.Printf("Prevent FOUC:			enabled (%s)\n", cfg.PreventFOUC.Colour)
+		preeeent("Prevent FOUC:", "enabled")
+		preeeent("Prevent FOUC colour:", cfg.PreventFOUC.Colour)
+		//fmt.Printf("Prevent FOUC:			enabled (%s)\n", cfg.PreventFOUC.Colour)
 	} else {
-		fmt.Printf("Prevent FOUC:         	disabled\n")
+		preeeent("Prevent FOUC:", "disabled")
 	}
 
-	fmt.Printf("Minify output:        	%v\n", yesNo(cfg.Minify))
-	fmt.Printf("Obfuscate JavaScript: 	%v\n", yesNo(cfg.Obfuscate))
+	preeeent("Minify output:", yesNo(cfg.Minify))
+	preeeent("Obfuscate JavaScript:", yesNo(cfg.Obfuscate))
 	fmt.Println(logger.Reset)
 }
 
