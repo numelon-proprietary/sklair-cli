@@ -6,6 +6,7 @@ import (
 	"os"
 	"path/filepath"
 	"sklair/building"
+	"sklair/building/priorities"
 	"sklair/caching"
 	"sklair/commandRegistry"
 	"sklair/discovery"
@@ -142,6 +143,11 @@ func init() {
 				logger.Info("Found %d tags to replace in %s", len(toReplace), filePath)
 
 				head := htmlUtilities.FindTag(doc, "head")
+				body := htmlUtilities.FindTag(doc, "body")
+				if head == nil || body == nil {
+					logger.Error("Could not find head or body tags in %s, how does that even happen??", filePath)
+					return 1
+				}
 
 				// usedComponents ensures that each component contributes its <head> nodes at most ONCE per document,
 				// even if the component appears multiple times in the source document
@@ -167,7 +173,7 @@ func init() {
 						htmlUtilities.InsertNodesBefore(originalTag, stcComponent.BodyNodes)
 
 						// this check ensures that each component contributes its <head> nodes at most ONCE per document
-						if _, seen := usedComponents[originalTag.Data]; !seen && head != nil {
+						if _, seen := usedComponents[originalTag.Data]; !seen {
 							htmlUtilities.AppendNodes(head, stcComponent.HeadNodes)
 						}
 						usedComponents[originalTag.Data] = struct{}{}
@@ -188,26 +194,66 @@ func init() {
 						}
 						parent.RemoveChild(originalTag)
 					} else {
-						logger.Warning("Component %s not in cache, assuming JS tag and skipping...", originalTag.Data)
+						logger.Warning("Component %s not in cache, assuming JS tag and skipping...", originalTag.Data) // TODO: specify what a JS tag actually is
 						continue
 					}
 				}
 
-				if config.PreventFOUC.Enabled {
-					body := htmlUtilities.FindTag(doc, "body")
+				// --------------------------------------------------
+				// resource hints
+				// --------------------------------------------------
 
-					if head != nil && body != nil {
-						head.InsertBefore(htmlUtilities.Clone(preventFoucHead), head.FirstChild)
-						body.AppendChild(htmlUtilities.Clone(preventFoucBody))
-					} else {
-						logger.Warning("Could not find head or body tags, skipping PreventFOUC for %s", filePath)
-					}
+				// TODO: if google found in link rel for google fonts, then add preconnect for fonts.gstatic.com
+				// basically for known preconnects
+
+				// cap preconnect to 6 origins
+				// warn if more than 6 and consider self hosting some assets
+				// ensure google fonts is cross origin
+				// todo image srcset
+				// https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Attributes/rel/preconnect
+				//origins := make(map[string]int)
+				//if config.ResourceHints != nil && config.ResourceHints.Enabled {
+				//	for node := range doc.Descendants() {
+				//		if node.Type == html.ElementNode {
+				//
+				//		}
+				//	}
+				//}
+
+				// --------------------------------------------------
+				// head segmentation and optimisation
+				// --------------------------------------------------
+				segmentedHead, err := building.SegmentHead(head)
+				if err != nil {
+					logger.Error("Could not segment <head> in %s : %s", filePath, err.Error())
+					return 1
 				}
 
-				if head != nil {
-					// TODO: remove this (generator) in the future or add an option in sklair.json to disable it
-					head.AppendChild(htmlUtilities.Clone(snippets.Generator))
-					building.OptimiseHead(head)
+				if config.PreventFOUC != nil && config.PreventFOUC.Enabled {
+					segmentedHead = append(segmentedHead, &building.HeadSegment{
+						Nodes:             []*html.Node{htmlUtilities.Clone(preventFoucHead)},
+						TreatAsTag:        priorities.PreventFOUC,
+						IsOrderingBarrier: false,
+					})
+
+					body.AppendChild(htmlUtilities.Clone(preventFoucBody))
+				}
+
+				// TODO: remove this (generator) in the future or add an option in sklair.json to disable it
+				segmentedHead = append(segmentedHead, &building.HeadSegment{
+					Nodes:             []*html.Node{htmlUtilities.Clone(snippets.Generator)},
+					TreatAsTag:        priorities.Generator,
+					IsOrderingBarrier: false,
+				})
+
+				segmentedHead = building.OptimiseHead(segmentedHead)
+
+				// put the segmented head back into the document head
+				htmlUtilities.RemoveAllChildren(head)
+				for _, seg := range segmentedHead {
+					for _, node := range seg.Nodes {
+						head.AppendChild(node) // no need to clone because everything was either already cloned before, OR is already from the same document
+					}
 				}
 
 				newWriter := bytes.NewBuffer(nil)

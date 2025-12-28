@@ -97,3 +97,15 @@ func WeakHashNode(n *html.Node) uint64 {
 
 	return superweakHash(lala.String())
 }
+
+func CommentNode(comment string) *html.Node {
+	return &html.Node{Type: html.CommentNode, Data: comment}
+}
+
+func RemoveAllChildren(n *html.Node) {
+	for c := n.FirstChild; c != nil; {
+		next := c.NextSibling
+		n.RemoveChild(c)
+		c = next
+	}
+}

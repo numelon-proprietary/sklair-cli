@@ -61,18 +61,23 @@ func configurationSummary(cfg sklairConfig.ProjectConfig) {
 	fmt.Println("--------------------------------------------------" + logger.Cyan)
 	preeeent("Input directory:", cfg.Input)
 	preeeent("Components directory:", cfg.Components)
+
 	preeeent("Output directory:", cfg.Output)
+
+	preeeent("Minify output:", yesNo(cfg.Minify))
+	if cfg.ObfuscateJS != nil && cfg.ObfuscateJS.Enabled {
+		preeeent("Obfuscate JavaScript:", "enabled")
+	} else {
+		preeeent("Obfuscate JavaScript:", "disabled")
+	}
 
 	if cfg.PreventFOUC != nil && cfg.PreventFOUC.Enabled {
 		preeeent("Prevent FOUC:", "enabled")
 		preeeent("Prevent FOUC colour:", cfg.PreventFOUC.Colour)
-		//fmt.Printf("Prevent FOUC:			enabled (%s)\n", cfg.PreventFOUC.Colour)
 	} else {
 		preeeent("Prevent FOUC:", "disabled")
 	}
 
-	preeeent("Minify output:", yesNo(cfg.Minify))
-	preeeent("Obfuscate JavaScript:", yesNo(cfg.Obfuscate))
 	fmt.Println(logger.Reset)
 }
 
@@ -98,6 +103,11 @@ func init() {
 
 			cfg.Output = askString("Where should the built site be written?", cfg.Output)
 
+			cfg.Minify = askBool("Do you want Sklair to minify your outputted HTML?", cfg.Minify)
+			// TODO: in the future, when ObfuscateJS is extended as a bigger object (instead of a regular bool),
+			// this question stays the same but notify the user that they can configure it in sklair.json themselves
+			cfg.ObfuscateJS.Enabled = askBool("Do you want Sklair to obfuscate your outputted JS?", cfg.ObfuscateJS.Enabled)
+
 			// TODO: add a "more info available at <docs link>" to this question because it is a bit vague
 			cfg.PreventFOUC.Enabled = askBool("Do you want Sklair to help prevent FOUC (Flash Of Unstyled Content)?", cfg.PreventFOUC.Enabled)
 			if cfg.PreventFOUC.Enabled {
@@ -106,11 +116,6 @@ func init() {
 			} else {
 				cfg.PreventFOUC = nil
 			}
-
-			cfg.Minify = askBool("Do you want Sklair to minify your outputted HTML?", cfg.Minify)
-			// TODO: in the future, when Obfuscate is extended as a bigger object (instead of a regular bool), this question stays the same
-			// but notify the user that they can configure it in sklair.json themselves
-			cfg.Obfuscate = askBool("Do you want Sklair to obfuscate your outputted JS?", cfg.Obfuscate)
 
 			// --------------------------------------------------
 

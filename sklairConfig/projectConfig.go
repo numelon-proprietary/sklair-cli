@@ -5,41 +5,59 @@ import (
 	"os"
 )
 
+// TODO: expand this struct when JS obfuscation is added
+type ObfuscateJS struct {
+	Enabled bool `json:"enabled,omitempty"`
+}
+
 type PreventFOUC struct {
 	Enabled bool   `json:"enabled,omitempty"`
 	Colour  string `json:"colour,omitempty"`
 }
 
-type ProjectConfig struct {
-	Input      string   `json:"input,omitempty"`
-	Components string   `json:"components,omitempty"`
-	Exclude    []string `json:"exclude,omitempty"`
+//type ResourceHints struct {
+//	Enabled    bool   `json:"enabled,omitempty"`
+//	SiteOrigin string `json:"siteOrigin,omitempty"`
+//}
 
+type ProjectConfig struct {
+	Input      string `json:"input,omitempty"`
+	Components string `json:"components,omitempty"`
+
+	Exclude        []string `json:"exclude,omitempty"`
 	ExcludeCompile []string `json:"excludeCompile,omitempty"`
-	Output         string   `json:"output,omitempty"`
+
+	Output string `json:"output,omitempty"`
+
+	Minify      bool         `json:"minify,omitempty"`
+	ObfuscateJS *ObfuscateJS `json:"obfuscateJS,omitempty"`
 
 	PreventFOUC *PreventFOUC `json:"PreventFOUC,omitempty"`
-
-	Minify    bool `json:"minify,omitempty"`
-	Obfuscate bool `json:"obfuscate,omitempty"`
+	//ResourceHints *ResourceHints `json:"resourceHints,omitempty"` // TODO: in sklair init, add ResourceHints to the questionnaire
 }
 
 var DefaultConfig = ProjectConfig{
 	Input:      "./",
 	Components: "./components",
-	Exclude:    []string{},
 
+	Exclude:        []string{},
 	ExcludeCompile: []string{},
-	Output:         "./build",
+
+	Output: "./build",
+
+	Minify: false,
+	ObfuscateJS: &ObfuscateJS{
+		Enabled: false,
+	},
 
 	PreventFOUC: &PreventFOUC{
 		Enabled: false,
 		Colour:  "#202020",
 	},
-
-	Minify:    false,
-	Obfuscate: false, // this pertains to JS obfuscation, not HTML.. you cant really obfuscate HTML per se
-	// TODO: likely rename "Obfuscate" to "ObfuscateJS" and make it another struct with more properties and customisation
+	//ResourceHints: &ResourceHints{
+	//	Enabled:    false,
+	//	SiteOrigin: "https://sklair.numelon.com", // TODO: maybe just make it empty by default
+	//},
 }
 
 func LoadProject(path string) (*ProjectConfig, error) {

@@ -1,6 +1,10 @@
 package snippets
 
-import "golang.org/x/net/html"
+import (
+	"sklair/htmlUtilities"
+
+	"golang.org/x/net/html"
+)
 
 func newMetaNode(name, property, content string) *html.Node {
 	key := "name"
@@ -30,9 +34,9 @@ func newMetaNode(name, property, content string) *html.Node {
   image="https://sklair.numelon.com/img/opengraph.jpg"
   url="https://sklair.numelon.com"
   siteName="Sklair"
-  twitterSite="@username" <-- THIS isnt implemented in the function below!
-  twitterCreator="@username" <-- THIS isnt implemented in the function below!
-								basically, just add a bunch of options from both standards (optional attributes to this opengraph component) so that its super duper customisable
+  twitterSite="@username" <-- THIS isn't implemented in the function below!
+  twitterCreator="@username" <-- THIS isn't implemented in the function below!
+								basically, just add a bunch of options from both standards (optional attributes to this opengraph component) so that its super-duper customisable
   type="website"
   imageSize="large"
 />
@@ -70,11 +74,10 @@ func OpenGraph(originalTag *html.Node) []*html.Node {
 			ogType = attr.Val
 		case "image_size":
 			imageSize = attr.Val
-			//if attr.Val == "small" {
-			//	imageSize = "small"
-			//}
 		}
 	}
+
+	out = append(out, htmlUtilities.CommentNode("sklair:ordering-barrier treat-as=dont-care"))
 
 	if siteName != "" {
 		out = append(out, newMetaNode("", "og:site_name", siteName))
@@ -121,6 +124,8 @@ func OpenGraph(originalTag *html.Node) []*html.Node {
 			newMetaNode("", "og:type", ogType),
 		)
 	}
+
+	out = append(out, htmlUtilities.CommentNode("sklair:ordering-barrier-end"))
 
 	return out
 }

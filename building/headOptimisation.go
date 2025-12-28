@@ -2,38 +2,47 @@ package building
 
 import (
 	"sklair/htmlUtilities"
-
-	"golang.org/x/net/html"
+	"sort"
 )
 
-func OptimiseHead(head *html.Node) {
-	DeduplicateHeadPass(head)
+// TODO: if no charset tag found, add one default utf8
+
+func OptimiseHead(segmented []*HeadSegment) []*HeadSegment {
+	segmented = deduplicateSegmented(segmented)
+	orderByPriority(segmented)
+	return segmented
 }
 
-func DeduplicateHeadPass(head *html.Node) {
+func deduplicateSegmented(segments []*HeadSegment) []*HeadSegment {
 	seenHead := make(map[uint64]struct{})
 
-	var toRemove []*html.Node
+	out := segments[:0]
 
-	for c := head.FirstChild; c != nil; c = c.NextSibling {
-		if c.Type != html.ElementNode {
+	for _, s := range segments {
+		if s.IsOrderingBarrier {
+			out = append(out, s)
 			continue
 		}
 
-		key := htmlUtilities.WeakHashNode(c)
+		key := htmlUtilities.WeakHashNode(s.Nodes[0])
 		if key == 0 {
+			out = append(out, s)
 			continue
 		}
 
 		if _, seen := seenHead[key]; seen {
-			//head.RemoveChild(c) // WE'RE GOING OVER A LINKED LIST - CANNOT MUTATE IT IMMEDIATELY!!!
-			toRemove = append(toRemove, c)
-			continue
+			continue // drop the duplicate entirely, i.e. don't append it back to the reused array (see "out := segments[:0]")
 		}
+
 		seenHead[key] = struct{}{}
+		out = append(out, s)
 	}
 
-	for _, node := range toRemove {
-		head.RemoveChild(node)
-	}
+	return out
+}
+
+func orderByPriority(segments []*HeadSegment) {
+	sort.Slice(segments, func(i, j int) bool {
+		return segments[i].TreatAsTag < segments[j].TreatAsTag
+	})
 }

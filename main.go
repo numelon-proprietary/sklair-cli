@@ -47,14 +47,12 @@ func run() int {
 	case *debug:
 		level = logger.LevelDebug
 
-		// --------------------------------------------------
 		// TODO: this is temporary!!
-		exePath, err := os.Executable()
-		if err != nil {
+		if exePath, err := os.Executable(); err == nil {
+			fmt.Println(exePath)
+		} else {
 			panic(err)
 		}
-		fmt.Println(exePath)
-	// --------------------------------------------------
 	case *verbose:
 		level = logger.LevelInfo
 	}

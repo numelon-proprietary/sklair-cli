@@ -55,6 +55,15 @@
 
 - extend CommandRegistry to allow per-subcommand help, also maybe fix per command flag parsing when required
 
+- in the future, all errors and warnings will have a link to the sklair documentation for more information
+
+
+
+
+
+
+- create an icon component, similar to the opengraph one
+
 ## more todo (a bit long-term?)
 
 sklair shouldn't just blindly replace components but also produce highly optimised output. yeah, sounds crazy for "just some HTML" but thats the point.

@@ -2,13 +2,15 @@
 out.html
 src/output.html
 sklair.log
+sklair.json
 
+# built items
 build
 src/build
 **.zip
 
-# files made during testing of sklair
-sklair.json
+# private files
+PRIVATE-notes.md
 
 # macOS Files
 **._*

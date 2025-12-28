@@ -13,24 +13,65 @@ type DocumentLists struct {
 	StaticFiles []string
 }
 
-// TODO: allow paths to not look ugly like this; make it closer to gitignore
-// eg allow "components" instead, ".git", "build" instead of "**/build/**"
 var defaultExcludes = []string{
-	"**/components/**", // default sklair component directory
+	"components/", // default sklair component directory
 	// although it must be noted that the component dir from config is used instead
 	// TODO: remove the components exclusion and use config one instead
-	"**/sklair.json",
-	"**/build/**", // use one from sklair.json instead too
+	"sklair.json",
+	"build/", // likewise with this, use build directory from sklair.json instead
+	".git/",
+	".vscode/",
+	".idea/",
+	".env*",
+	"node_modules/",
+	".DS_*",
+	"._*",
+}
 
-	"**/.git/**",
-	"**/.vscode/**",
-	"**/.idea/**",
+func normaliseExcludes(patterns []string) []string {
+	var out []string
 
-	"**/.env*", // highly sensitive
-	"**/node_modules/**",
+	for _, p := range patterns {
+		p = strings.TrimSpace(p)
+		if p == "" {
+			continue
+		}
 
-	"**/.DS_*", // macOS garbage
-	"**/._*",   // macOS garbage
+		negated := strings.HasPrefix(p, "!")
+		if negated {
+			p = p[1:]
+		}
+
+		p = filepath.ToSlash(p)
+
+		rootAnchored := strings.HasPrefix(p, "/")
+		if rootAnchored {
+			p = p[1:]
+		}
+
+		// directory
+		if strings.HasSuffix(p, "/") {
+			p = strings.TrimSuffix(p, "/")
+			if rootAnchored {
+				p = p + "/**"
+			} else {
+				p = "**/" + p + "/**"
+			}
+		} else {
+			// file or glob
+			if !rootAnchored {
+				p = "**/" + p
+			}
+		}
+
+		if negated {
+			p = "!" + p
+		}
+
+		out = append(out, p)
+	}
+
+	return out
 }
 
 func splitPatterns(patterns []string) (excludes, includes []string) {
@@ -68,6 +109,8 @@ func DiscoverDocuments(root string, excludes []string) (*DocumentLists, error) {
 	lists := &DocumentLists{}
 
 	excludes = append(defaultExcludes, excludes...)
+	excludes = normaliseExcludes(excludes)
+	//fmt.Println(excludes)
 	excludePatterns, includePatterns := splitPatterns(excludes)
 
 	err := filepath.Walk(root, func(path string, info os.FileInfo, err error) error {

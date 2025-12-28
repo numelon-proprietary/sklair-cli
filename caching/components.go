@@ -21,6 +21,28 @@ type ComponentCache struct {
 	Dynamic map[string]*Component
 }
 
+// naiveValidation has one purpose:
+// if you tried to use this feature, you must at least LOOK like you used it correctly,
+// otherwise later stages will come back to bite you
+func naiveValidation(b []byte) error {
+	if bytes.Contains(b, []byte("sklair:ordering-barrier")) {
+		if !bytes.Contains(b, []byte("treat-as=")) {
+			return errors.New("ordering barrier missing treat-as= in component")
+		}
+		if !bytes.Contains(b, []byte("sklair:ordering-barrier-end")) {
+			return errors.New("unterminated ordering barrier in component")
+		}
+	}
+
+	if bytes.Contains(b, []byte("sklair:remove")) {
+		if !bytes.Contains(b, []byte("sklair:remove-end")) {
+			return errors.New("unterminated remove directive in component")
+		}
+	}
+
+	return nil
+}
+
 func MakeCache(source string, fileName string) (*Component, error) {
 	path := filepath.Join(source, fileName)
 
@@ -33,17 +55,25 @@ func MakeCache(source string, fileName string) (*Component, error) {
 		return nil, err
 	}
 
-	// this is VERY naive but it actually works, we simply check for an opening lua tag
-	// TODO: do the same check for html files
+	// the idea is that we want MakeCache to CHEAPLY validate things (instead of implementing a mini parser here),
+	// and any actual errors will be caught in later stages
+	// (like parsing)
+	veryVeryNaive := naiveValidation(f)
+	if veryVeryNaive != nil {
+		return nil, veryVeryNaive
+	}
+
+	// this is VERY naive, but it actually works; we simply check for an opening lua tag
 	hasLua := bytes.Contains(f, []byte("<lua"))
 	component, err := html.Parse(bytes.NewReader(f))
 	if err != nil {
 		return nil, err
 	}
 
-	// even though components are usually bare (without doctype, head, body, etc), we still need to find the "body" (bc parsed)
-	// because x/net/html automatically interprets the file as if its a full browser
-	// ie it adds a doctype, head, body, etc tags automatically even if our input file doesnt have them
+	// even though components are usually bare (without doctype, head, body, etc.),
+	// we still need to find the "body" (bc parsed)
+	// because x/net/html automatically interprets the file just like a full browser would.
+	// i.e. it adds a doctype, head, body, etc. tags automatically even if our input file doesn't have them
 
 	//htmlNode := htmlUtilities.FindTag(component, "html")
 

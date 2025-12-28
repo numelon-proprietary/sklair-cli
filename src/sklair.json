@@ -1,20 +1,18 @@
 {
-	"preventFOUC": {
-		"enabled": true,
-		"colour": "#24100a"
-	},
-
 	"input": "./",
 	"components": "./components",
-	"exclude": ["**/.*",
-      "!*/.htaccess",
-      "**/*.md",
-      "**/*.psd"
-    ],
+	"exclude": [".*", "!.htaccess", "*.md", "*.psd"],
 
 	"exclude_compile": ["someBigFile.html"],
 	"output": "./build",
 
 	"minify": true,
-	"obfuscate": true
+	"obfuscateJS": {
+      "enabled": true
+    },
+
+	"preventFOUC": {
+		"enabled": true,
+		"colour": "#24100a"
+	}
 }
