@@ -86,6 +86,9 @@ func init() {
 			for {
 				select {
 				case <-events:
+					_ = os.RemoveAll(tmp)
+					_ = os.MkdirAll(tmp, 0755)
+
 					err = building.Build(config, configDir, tmp)
 					if err != nil {
 						logger.Error(err.Error())

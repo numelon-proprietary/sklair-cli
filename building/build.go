@@ -235,7 +235,10 @@ func Build(config *sklairConfig.ProjectConfig, configDir string, outputDirOverri
 		}
 
 		outPath := filepath.Join(outputDir, relPath)
-		_ = os.MkdirAll(filepath.Dir(outPath), 0755)
+		err = os.MkdirAll(filepath.Dir(outPath), 0755)
+		if err != nil {
+			return fmt.Errorf("could not create output directory for %s : %s", filePath, err.Error())
+		}
 
 		err = os.WriteFile(outPath, newWriter.Bytes(), 0644)
 		if err != nil {
@@ -257,7 +260,10 @@ func Build(config *sklairConfig.ProjectConfig, configDir string, outputDirOverri
 		}
 
 		outPath := filepath.Join(outputDir, relPath)
-		_ = os.MkdirAll(filepath.Dir(outPath), 0755)
+		err = os.MkdirAll(filepath.Dir(outPath), 0755)
+		if err != nil {
+			return fmt.Errorf("could not create output directory for %s : %s", filePath, err.Error())
+		}
 
 		data, err := os.ReadFile(filePath)
 		if err != nil {

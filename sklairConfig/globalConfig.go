@@ -8,11 +8,11 @@ import (
 // TODO: check TODO.md for more info about this
 
 type GlobalConfig struct {
-	//AutoUpdate bool `json:"autoUpdate,omitempty"`
+	CheckForUpdates bool `json:"checkForUpdates,omitempty"`
 }
 
 var defaultGlobalConfig = GlobalConfig{
-	//AutoUpdate: true,
+	CheckForUpdates: true,
 }
 
 func GlobalConfigPath() (string, error) {
