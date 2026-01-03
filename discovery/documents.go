@@ -138,7 +138,7 @@ func DiscoverDocuments(root string, excludes []string) (*DocumentLists, error) {
 		}
 
 		ext := filepath.Ext(strings.ToLower(info.Name()))
-		if ext == ".htm" || ext == ".html" || ext == ".shtml" {
+		if ext == ".htm" || ext == ".html" || ext == ".shtml" || ext == ".xhtml" {
 			lists.HtmlFiles = append(lists.HtmlFiles, path)
 		} else {
 			lists.StaticFiles = append(lists.StaticFiles, path)
