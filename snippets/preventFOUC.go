@@ -12,7 +12,7 @@ import (
 //go:embed preventFOUC.html
 var pfoucSrc string
 
-// TODO: when building concurrency is added to sklair, then make GetFOUCNodes cache the result
+// TODO: IF (BIG IF) and when building concurrency is added to sklair, then make GetFOUCNodes cache the result
 // then use sync.Once
 // var (
 //

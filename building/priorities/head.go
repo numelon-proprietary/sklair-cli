@@ -17,7 +17,7 @@ const (
 
 	Title
 
-	// TODO: add "Icon"
+	// TODO: add "Icon", and it is just below title
 
 	Stylesheet
 	Script

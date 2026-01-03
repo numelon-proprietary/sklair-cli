@@ -90,7 +90,7 @@ func MakeCache(source string, fileName string) (*Component, error) {
 	}
 
 	return &Component{
-		HeadNodes: htmlUtilities.GetAllChildren(headNode), // TODO: in the final render of a source document, perform THOROUGH deduplication of head nodes
+		HeadNodes: htmlUtilities.GetAllChildren(headNode),
 		BodyNodes: htmlUtilities.GetAllChildren(bodyNode),
 		Dynamic:   hasLua, // TODO: when allowing circular components, Dynamic will be inherited based on whether it contains any components that are also dynamic
 	}, nil

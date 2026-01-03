@@ -14,11 +14,7 @@ type DocumentLists struct {
 }
 
 var defaultExcludes = []string{
-	"components/", // default sklair component directory
-	// although it must be noted that the component dir from config is used instead
-	// TODO: remove the components exclusion and use config one instead
 	"sklair.json",
-	"build/", // likewise with this, use build directory from sklair.json instead
 	".git/",
 	".vscode/",
 	".idea/",
@@ -142,8 +138,7 @@ func DiscoverDocuments(root string, excludes []string) (*DocumentLists, error) {
 		}
 
 		ext := filepath.Ext(strings.ToLower(info.Name()))
-		// TODO: perhaps allow this file ext to be customisable?
-		if ext == ".html" || ext == ".shtml" {
+		if ext == ".htm" || ext == ".html" || ext == ".shtml" {
 			lists.HtmlFiles = append(lists.HtmlFiles, path)
 		} else {
 			lists.StaticFiles = append(lists.StaticFiles, path)

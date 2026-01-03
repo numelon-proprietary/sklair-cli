@@ -90,7 +90,7 @@ func Build(config *sklairConfig.ProjectConfig, configDir string, outputDirOverri
 					if !(dynamicExists || staticExists) && (!(tag == "lua" || tag == "opengraph")) {
 						componentSrc, exists := components[tag]
 						if !exists {
-							logger.Warning("Non-standard tag found in HTML and no component present : %s, assuming JS tag", tag)
+							logger.Warning("Non-standard tag found in HTML and no component present : %s; assuming Autonomous Custom Element", tag)
 							continue
 						}
 
@@ -112,7 +112,6 @@ func Build(config *sklairConfig.ProjectConfig, configDir string, outputDirOverri
 			}
 		}
 
-		// TODO: LEFT OFF HERE. AFTER ALL NODES DISCOVERED ETC NEED TO REPLACE
 		// TODO: in the future, hash component file contents and construct local cache in .sklair directory
 		// but how would we "cache" a html.Node struct?? lol
 
@@ -160,6 +159,8 @@ func Build(config *sklairConfig.ProjectConfig, configDir string, outputDirOverri
 				// TODO: prints from lua will be appended to a buffer
 				// then this buffer will be parsed by html
 				// then this will be inserted into document
+				// TODO: or should we actually instead expose a library eg `sklair` and we can do `sklair.put()`? thats probably cleaner
+				// and also easier to implement
 				logger.Warning("Lua components for regular input files are not implemented yet, skipping...")
 				continue
 			} else if originalTag.Data == "opengraph" {
@@ -168,7 +169,7 @@ func Build(config *sklairConfig.ProjectConfig, configDir string, outputDirOverri
 				}
 				parent.RemoveChild(originalTag)
 			} else {
-				logger.Warning("Component %s not in cache, assuming JS tag and skipping...", originalTag.Data) // TODO: specify what a JS tag actually is
+				logger.Warning("Component %s not in cache; assuming unregistered custom element and skipping...", originalTag.Data)
 				continue
 			}
 		}

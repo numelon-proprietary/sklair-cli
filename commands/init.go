@@ -29,7 +29,6 @@ func askBool(prompt string, fallback bool) bool {
 		defaultStr = "yes"
 	}
 
-	// TODO: instead of y/N and Y/n, just say "default: yes" or "default: no"
 	fmt.Printf("%s (default: %s): ", prompt, defaultStr)
 	var input string
 	_, _ = fmt.Scanln(&input)

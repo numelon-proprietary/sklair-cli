@@ -7,7 +7,6 @@ import (
 )
 
 func DiscoverComponents(source string) (map[string]string, error) {
-	// TODO: make the components path configurable as per sklair.json later
 	dir, err := os.ReadDir(source)
 	if err != nil {
 		return nil, err

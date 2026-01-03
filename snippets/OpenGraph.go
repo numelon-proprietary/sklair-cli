@@ -43,8 +43,6 @@ func newMetaNode(name, property, content string) *html.Node {
 
 */
 
-// TODO: all opengraph tags should be inserted at the very end of the head tag of outputs
-// after inserting everything, at the end of the for loop of toReplace, go through the head and do a heuristic sort
 func OpenGraph(originalTag *html.Node) []*html.Node {
 	var out []*html.Node
 
@@ -98,7 +96,6 @@ func OpenGraph(originalTag *html.Node) []*html.Node {
 		)
 	}
 
-	// TODO: always emit twitter card if image exists
 	if image != "" {
 		out = append(out,
 			newMetaNode("twitter:image", "", image),
