@@ -34,7 +34,6 @@ func init() {
 	commandRegistry.Registry.Register(&commandRegistry.Command{
 		Name:        "serve",
 		Description: "Continuously builds and serves a Sklair project for development purposes",
-		Aliases:     []string{"s"},
 		Run: func(args []string) int {
 			config, configDir, err := sklairConfig.LoadProjectConfig()
 			if err != nil {

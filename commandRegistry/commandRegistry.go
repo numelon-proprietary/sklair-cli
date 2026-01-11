@@ -7,7 +7,6 @@ import "fmt"
 type Command struct {
 	Name        string
 	Description string
-	Aliases     []string
 	Run         func(args []string) int
 }
 
@@ -34,9 +33,6 @@ func New() *CommandRegistry {
 
 func (r *CommandRegistry) Register(cmd *Command) {
 	r.commands[cmd.Name] = cmd
-	for _, alias := range cmd.Aliases {
-		r.commands[alias] = cmd
-	}
 }
 
 func (r *CommandRegistry) Get(name string) (*Command, bool) {

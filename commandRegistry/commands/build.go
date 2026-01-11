@@ -11,7 +11,6 @@ func init() {
 	commandRegistry.Registry.Register(&commandRegistry.Command{
 		Name:        "build",
 		Description: "Builds a Sklair project",
-		Aliases:     []string{"b"},
 		Run: func(args []string) int {
 			config, configDir, err := sklairConfig.LoadProjectConfig()
 			if err != nil {

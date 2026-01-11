@@ -12,7 +12,6 @@ func init() {
 	commandRegistry.Registry.Register(&commandRegistry.Command{
 		Name:        "clean",
 		Description: "Removes all temporary and generated files made by Sklair, including hook-created caches",
-		Aliases:     []string{"c"},
 		Run: func(args []string) int {
 			config, configDir, err := sklairConfig.LoadProjectConfig()
 			if err != nil {
