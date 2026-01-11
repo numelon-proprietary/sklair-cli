@@ -41,8 +41,9 @@ func openFs(opts *SandboxOptions) lua.LGFunction {
 type LFuncWithFSContext func(*FSContext) lua.LGFunction
 
 var fsFuncs = map[string]LFuncWithFSContext{
-	"read":  readFile,
-	"write": writeFile,
+	"read":    readFile,
+	"write":   writeFile,
+	"scandir": scanDir,
 }
 
 type AccessMode uint8
@@ -143,7 +144,38 @@ func writeFile(ctx *FSContext) lua.LGFunction {
 	}
 }
 
-// TODO: create fs.scandir
+func scanDir(ctx *FSContext) lua.LGFunction {
+	return func(L *lua.LState) int {
+		name := L.CheckString(1)
+
+		path, err := resolvePath(ctx, name, AccessModeRead)
+		if err != nil {
+			L.Push(lua.LNil)
+			L.Push(lua.LString(err.Error()))
+			return 2
+		}
+
+		entries, err := os.ReadDir(path)
+		if err != nil {
+			L.Push(lua.LNil)
+			L.Push(lua.LString(err.Error()))
+			return 2
+		}
+
+		table := L.NewTable()
+
+		for i, entry := range entries {
+			obj := L.NewTable()
+			obj.RawSetString("name", lua.LString(entry.Name()))
+			obj.RawSetString("isDir", lua.LBool(entry.IsDir()))
+
+			table.RawSetInt(i+1, obj)
+		}
+
+		L.Push(table)
+		return 1
+	}
+}
 
 // cache:file.txt -> .sklair/cache/file.txt
 // project:file.txt (only this one allows READONLY access to one level above the project directory, using project:../file.txt)
